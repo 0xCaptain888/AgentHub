@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentHub - 跨境电商AI智能平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sb-logo">A</div>
+  <div class="sb-nav">
+    <button class="sb-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="sb-tooltip">总览面板</span>
+    </button>
+    <button class="sb-btn" data-tab="cs" onclick="switchTab('cs')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span class="sb-tooltip">智能客服</span>
+    </button>
+    <button class="sb-btn" data-tab="listing" onclick="switchTab('listing')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span class="sb-tooltip">Listing生成</span>
+    </button>
+    <button class="sb-btn" data-tab="content" onclick="switchTab('content')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      <span class="sb-tooltip">TikTok内容</span>
+    </button>
+    <button class="sb-btn" data-tab="competitor" onclick="switchTab('competitor')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span class="sb-tooltip">竞品监控</span>
+    </button>
+    <button class="sb-btn" data-tab="supply" onclick="switchTab('supply')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span class="sb-tooltip">供应链管理</span>
+    </button>
+    <button class="sb-btn" data-tab="profit" onclick="switchTab('profit')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <span class="sb-tooltip">利润分析</span>
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN WRAPPER -->
+<div id="main-wrapper">
+  <header id="topbar">
+    <div class="tb-title">Agent<span>Hub</span></div>
+    <div class="tb-sep"></div>
+    <div class="tb-status" id="conn-status"><span class="dot dot-g dot-pulse"></span> 连接中...</div>
+    <div style="flex:1"></div>
+    <div class="cmd-bar-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="cmd-bar-input" id="cmd-input" placeholder="输入指令... (Ctrl+K)" onkeydown="if(event.key==='Enter')runCommand()">
+      <span class="cmd-kbd">Ctrl+K</span>
+    </div>
+    <div class="tb-spacer"></div>
+    <div class="export-btn-wrap">
+      <button class="btn btn-sm btn-secondary" onclick="toggleExportDropdown()" style="font-size:.72rem">⬇ 导出</button>
+      <div class="export-dropdown" id="export-dropdown">
+        <button onclick="exportCSV('inventory')">📊 库存数据 (CSV)</button>
+        <button onclick="exportCSV('profit')">💰 利润报告 (CSV)</button>
+        <button onclick="exportCSV('competitor')">📈 竞品分析 (CSV)</button>
+        <button onclick="printReport()">📄 打印报告</button>
+      </div>
+    </div>
+    <div class="theme-picker-wrap">
+      <button class="btn btn-sm btn-secondary" onclick="toggleThemeDropdown()" style="font-size:.72rem">🎨 主题</button>
+      <div class="theme-dropdown" id="theme-dropdown">
+        <button class="active-theme" onclick="setTheme('dark')"><span class="theme-dot" style="background:#0b1120"></span> 深空蓝</button>
+        <button onclick="setTheme('light')"><span class="theme-dot" style="background:#f0f2f5"></span> 浅色模式</button>
+        <button onclick="setTheme('gold')"><span class="theme-dot" style="background:#d4a017"></span> 商务金</button>
+        <button onclick="setTheme('green')"><span class="theme-dot" style="background:#00ff88"></span> 极客绿</button>
+      </div>
+    </div>
+    <button class="btn btn-sm btn-secondary" onclick="startTour()" style="font-size:.72rem">❓ 引导</button>
+    <button class="btn btn-sm btn-secondary tb-bigscreen-btn" onclick="toggleBigScreen()" style="font-size:.72rem">📺 大屏模式</button>
+    <div class="tb-time" id="tb-time"></div>
+  </header>
+
+  <main id="content">
+    <div class="bigscreen-banner">AgentHub — 跨境电商AI智能平台</div>
+    <!-- TAB: Dashboard -->
+    <section id="tab-dashboard" class="tab-panel active">
+      <div class="cards-row" id="kpi-cards"><div class="skeleton-row"><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div></div></div>
+      <!-- AI Insight Engine -->
+      <div class="panel"><div class="panel-hd"><h3>AI 智能洞察</h3><span style="font-size:.68rem;color:var(--t3)">基于实时数据自动生成</span></div><div class="panel-bd"><div class="insight-grid" id="ai-insights"><div class="skeleton skeleton-block" style="height:120px"></div><div class="skeleton skeleton-block" style="height:120px"></div></div></div></div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-hd"><h3>客服意图分布</h3></div><div class="panel-bd" id="intent-chart"><div class="skeleton skeleton-block" style="height:200px"></div></div></div>
+        <div class="panel"><div class="panel-hd"><h3>竞品预警</h3></div><div class="panel-bd" id="comp-alerts"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w80"></div></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-hd"><h3>销售趋势</h3></div><div class="panel-bd"><div class="echart-box" id="sales-trend-chart"></div></div></div>
+        <div class="panel"><div class="panel-hd"><h3>Agent 协作网络</h3></div><div class="panel-bd"><div class="agent-network" id="agent-network"></div></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-hd"><h3>库存预警</h3></div><div class="panel-bd" id="inv-alerts"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w80"></div></div></div>
+        <div class="panel"><div class="panel-hd"><h3>API 连接状态</h3></div><div class="panel-bd" id="api-status"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div></div></div>
+      </div>
+      <!-- Global Order Map -->
+      <div class="panel map-panel"><div class="panel-hd"><h3>全球订单热力图</h3><span style="font-size:.68rem;color:var(--t3)">实时订单分布</span></div><div class="panel-bd" id="world-map-container"></div></div>
+      <!-- Customer Funnel -->
+      <div class="panel"><div class="panel-hd"><h3>客户转化漏斗</h3></div><div class="panel-bd" id="funnel-container"></div></div>
+    </section>
+
+    <!-- TAB: Customer Service -->
+    <section id="tab-cs" class="tab-panel">
+      <div class="chat-layout">
+        <div class="chat-main">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+            <span style="font-size:.78rem;font-weight:600">平台：</span>
+            <select id="cs-platform"><option value="tiktok">TikTok Shop</option><option value="amazon">Amazon</option></select>
+          </div>
+          <div class="chat-messages" id="cs-messages">
+            <div style="text-align:center;color:var(--t3);padding:40px;font-size:.82rem">发送客户消息以开始AI智能客服对话。</div>
+          </div>
+          <div id="cs-quick-replies" class="quick-replies">
+            <button class="quick-btn" onclick="document.getElementById('cs-input').value=this.textContent;sendCS()">我的订单 ORD-20250305-002 到哪了？</button>
+            <button class="quick-btn" onclick="document.getElementById('cs-input').value=this.textContent;sendCS()">收到的商品有损坏，我想退货</button>
+            <button class="quick-btn" onclick="document.getElementById('cs-input').value=this.textContent;sendCS()">有哪些尺码可选？</button>
+            <button class="quick-btn" onclick="document.getElementById('cs-input').value=this.textContent;sendCS()">你们支持批发价格吗？</button>
+            <button class="quick-btn" onclick="document.getElementById('cs-input').value=this.textContent;sendCS()">这是骗局，我要找律师</button>
+          </div>
+          <div class="chat-input-row">
+            <input class="chat-input" id="cs-input" placeholder="输入客户消息..." onkeydown="if(event.key==='Enter')sendCS()">
+            <button class="btn btn-primary" onclick="sendCS()">发送</button>
+          </div>
+        </div>
+        <div class="chat-sidebar">
+          <div class="chat-meta" id="cs-intent-panel"><h4>意图分类</h4><div style="color:var(--t3);font-size:.78rem">暂无消息</div></div>
+          <div class="chat-meta" id="cs-kb-panel"><h4>知识库匹配</h4><div style="color:var(--t3);font-size:.78rem">--</div></div>
+          <div class="chat-meta" id="cs-order-panel"><h4>订单查询</h4><div style="color:var(--t3);font-size:.78rem">--</div></div>
+          <div class="chat-meta" id="cs-stats-panel"><h4>客服统计</h4><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w80"></div></div>
+          <div class="chat-meta" id="cs-sentiment-panel"><h4>情绪分析</h4><div style="color:var(--t3);font-size:.78rem">发送消息后显示情绪分析</div><div class="sentiment-gauge-box" id="sentiment-gauge"></div><div id="sentiment-label" style="text-align:center;font-size:.75rem;color:var(--t2);margin:4px 0">当前情绪: --</div><div style="font-size:.68rem;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin:8px 0 4px">情绪波动</div><div class="sentiment-line-box" id="sentiment-line"></div></div>
+          <div class="chat-meta" id="cs-satisfaction-panel"><h4>服务评价</h4><div id="cs-avg-rating" style="color:var(--t3);font-size:.78rem">暂无评价</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: Listing Generator -->
+    <section id="tab-listing" class="tab-panel">
+      <div class="grid-2">
+        <div>
+          <div class="panel"><div class="panel-hd"><h3>生成Listing</h3></div><div class="panel-bd">
+            <div class="form-row">
+              <div class="form-group"><label>产品</label><select id="lst-product"><option value="earbuds">耳机</option><option value="yoga_mat">瑜伽垫</option><option value="desk_lamp">台灯</option></select></div>
+              <div class="form-group"><label>平台</label><select id="lst-platform"><option value="amazon">Amazon</option><option value="tiktok">TikTok</option></select></div>
+              <div class="form-group"><label>语言</label><select id="lst-lang"><option value="en">英文</option><option value="zh">中文</option><option value="es">西班牙文</option><option value="ja">日文</option></select></div>
+            </div>
+            <button class="btn btn-primary" onclick="generateListing()" id="lst-gen-btn">生成Listing</button>
+          </div></div>
+          <div class="panel" id="lst-seo-panel" style="display:none"><div class="panel-hd"><h3>SEO评分</h3></div><div class="panel-bd" id="lst-seo"></div></div>
+          <div class="panel" id="lst-keywords-panel" style="display:none"><div class="panel-hd"><h3>关键词</h3></div><div class="panel-bd" id="lst-keywords"></div></div>
+          <div class="panel" id="lst-comp-panel" style="display:none"><div class="panel-hd"><h3>竞品对比</h3></div><div class="panel-bd" id="lst-comp-table"></div></div>
+        </div>
+        <div>
+          <div class="panel" id="lst-preview-panel" style="display:none"><div class="panel-hd"><h3>Listing预览</h3></div><div class="panel-bd" id="lst-preview"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: TikTok Content -->
+    <section id="tab-content" class="tab-panel">
+      <div class="grid-2">
+        <div>
+          <div class="panel"><div class="panel-hd"><h3>脚本生成器</h3></div><div class="panel-bd">
+            <div class="form-group"><label>产品名称</label><input id="ct-product" placeholder="例如: ProBuds X3"></div>
+            <div class="form-group"><label>产品特点</label><input id="ct-features" placeholder="例如: 主动降噪, 32小时续航, IPX5防水"></div>
+            <div class="form-row">
+              <div class="form-group"><label>格式</label><select id="ct-format"><option value="unboxing">开箱视频</option><option value="review">产品测评</option><option value="comparison">对比评测</option><option value="lifestyle">生活方式</option></select></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary" onclick="generateScript()">生成脚本</button>
+              <button class="btn btn-secondary" onclick="generateLiveScript()">直播话术</button>
+            </div>
+          </div></div>
+          <div class="panel" id="ct-script-panel" style="display:none"><div class="panel-hd"><h3>生成的脚本</h3></div><div class="panel-bd" id="ct-script"></div></div>
+          <div class="panel" id="ct-hashtags-panel" style="display:none"><div class="panel-hd"><h3>标签</h3></div><div class="panel-bd" id="ct-hashtags"></div></div>
+        </div>
+        <div>
+          <div class="panel"><div class="panel-hd"><h3>7天内容日历</h3></div><div class="panel-bd" id="ct-calendar"><div class="skeleton skeleton-block" style="height:100px"></div></div></div>
+          <div class="panel" id="ct-trending-panel"><div class="panel-hd"><h3>热门话题</h3></div><div class="panel-bd" id="ct-trending"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div></div></div>
+          <div class="panel"><div class="panel-hd"><h3>AI 选品推荐</h3><span style="font-size:.68rem;color:var(--t3)">基于5维评估模型</span></div><div class="panel-bd" id="ct-product-radar"></div></div>
+          <div class="panel"><div class="panel-hd"><h3>最佳发布时间</h3><span style="font-size:.68rem;color:var(--t3)">基于互动数据分析</span></div><div class="panel-bd"><div class="heatmap-chart" id="ct-posting-heatmap"></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: Competitor Monitor -->
+    <section id="tab-competitor" class="tab-panel">
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+        <span style="font-size:.78rem;font-weight:600;color:var(--t2)">产品：</span>
+        <div id="comp-product-tabs" style="display:flex;gap:6px"></div>
+        <div style="flex:1"></div>
+        <input id="comp-search-input" placeholder="搜索竞品..." style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:6px 12px;font-size:.78rem;width:260px">
+        <button class="btn btn-sm btn-primary" onclick="competitorSearch()">搜索</button>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="panel"><div class="panel-hd"><h3>价格对比</h3></div><div class="panel-bd" id="comp-prices"><div class="skeleton skeleton-block" style="height:140px"></div></div></div>
+          <div class="panel"><div class="panel-hd"><h3>价格趋势</h3></div><div class="panel-bd" id="comp-history"><div class="skeleton skeleton-block" style="height:200px"></div></div></div>
+          <div class="panel" id="comp-search-panel" style="display:none"><div class="panel-hd"><h3>搜索结果</h3></div><div class="panel-bd" id="comp-search-results"></div></div>
+        </div>
+        <div>
+          <div class="panel"><div class="panel-hd"><h3>预警信息</h3></div><div class="panel-bd" id="comp-alert-list"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div></div></div>
+          <div class="panel"><div class="panel-hd"><h3>定价建议</h3></div><div class="panel-bd" id="comp-recommendation"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w80"></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: Supply Chain -->
+    <section id="tab-supply" class="tab-panel">
+      <div class="panel"><div class="panel-hd"><h3>库存总览</h3></div><div class="panel-bd" id="supply-table"><div class="skeleton skeleton-block" style="height:160px"></div></div></div>
+      <div class="grid-3">
+        <div class="panel"><div class="panel-hd"><h3>补货计划</h3></div><div class="panel-bd">
+          <div class="form-group"><label>产品</label><select id="supply-product"><option value="earbuds">耳机</option><option value="yoga_mat">瑜伽垫</option><option value="desk_lamp">台灯</option></select></div>
+          <button class="btn btn-primary btn-sm" onclick="generateRestock()" style="margin-bottom:12px">生成补货计划</button>
+          <div id="supply-restock"></div>
+        </div></div>
+        <div class="panel"><div class="panel-hd"><h3>需求预测</h3></div><div class="panel-bd">
+          <div class="form-row">
+            <div class="form-group"><label>产品</label><select id="forecast-product"><option value="earbuds">耳机</option><option value="yoga_mat">瑜伽垫</option><option value="desk_lamp">台灯</option></select></div>
+            <div class="form-group"><label>天数</label><select id="forecast-days"><option value="30">30</option><option value="60">60</option><option value="90">90</option></select></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="generateForecast()" style="margin-bottom:12px">预测</button>
+          <div id="supply-forecast"></div>
+        </div></div>
+        <div class="panel"><div class="panel-hd"><h3>供应链预警</h3></div><div class="panel-bd" id="supply-alerts"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div></div></div>
+      </div>
+    </section>
+
+    <!-- TAB: Profit Analysis -->
+    <section id="tab-profit" class="tab-panel">
+      <div class="profit-kpi-row" id="profit-kpi-cards"></div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-hd"><h3>P&L 分析</h3></div><div class="panel-bd" id="pnl-table"></div></div>
+        <div class="panel"><div class="panel-hd"><h3>利润趋势</h3></div><div class="panel-bd"><div class="echart-box" id="profit-trend-chart"></div></div></div>
+      </div>
+      <div class="panel"><div class="panel-hd"><h3>平台对比</h3></div><div class="panel-bd"><div class="echart-box" id="platform-compare-chart"></div></div></div>
+    </section>
+  </main>
+</div>
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
