@@ -4,7 +4,7 @@
 
 ## 在线演示
 
-👉 **[Live Demo](https://0xcaptain888.github.io/AgentHub/output/)**
+👉 **[Live Demo](https://0xcaptain888.github.io/AgentHub/)**
 
 > 演示站点使用模拟数据运行，接入真实API后可处理实际业务数据。
 
